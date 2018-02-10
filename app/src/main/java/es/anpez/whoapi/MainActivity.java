@@ -1,15 +1,12 @@
 package es.anpez.whoapi;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,35 +22,48 @@ public class MainActivity extends AppCompatActivity {
     List<Doctor> doctors = new ArrayList<>();
     //doctors.add(new Doctor("William Hartnell"));
     //doctors.add(new Doctor("David Tennant"));
-for(int i=0;i<1000;i++) {
-  doctors.add(new Doctor("Doctor"+i));
-}
-    ListView list = findViewById(R.id.list);
-    list.setAdapter(new DoctorsAdapter(this, doctors));
-  }
-
-  public class DoctorsAdapter extends ArrayAdapter<Doctor> {
-    public DoctorsAdapter(Context context, List<Doctor> doctors) {
-      super(context, 0, doctors);
+    for(int i=0;i<1000;i++) {
+      doctors.add(new Doctor("Doctor"+i));
     }
 
+    final RecyclerView recyclerView = findViewById(R.id.list);
+    recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+    recyclerView.setAdapter(new DoctorsAdapter(doctors));
+  }
 
-    @NonNull
-    @Override
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-      Doctor doctor = getItem(position);
+  public class DoctorsAdapter extends RecyclerView.Adapter<DoctorsAdapter.DoctorViewHolder> {
+    public class DoctorViewHolder extends RecyclerView.ViewHolder {
+      TextView nameTextView;
+      TextView aliasTextView;
 
-      if (null == convertView) {
-        Log.d("DoctorsAdapter", "Creando posicion:"+position);
-        convertView = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_doctors_item, parent, false);
-      } else {
-        Log.d("DoctorsAdapter", "Reusando posicion:"+position);
+      public DoctorViewHolder(View itemView) {
+        super(itemView);
+        nameTextView = itemView.findViewById(R.id.name);
+        aliasTextView= itemView.findViewById(R.id.alias);
       }
+    }
 
-      TextView tv = convertView.findViewById(R.id.name);
-      tv.setText(doctor.name);
+    private List<Doctor> doctors;
 
-      return convertView;
+    public DoctorsAdapter(List<Doctor> doctors) {
+      this.doctors = doctors;
+    }
+
+    @Override
+    public DoctorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_doctors_item, parent, false);
+      return new DoctorViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(DoctorViewHolder holder, int position) {
+      holder.nameTextView.setText(doctors.get(position).name);
+      holder.aliasTextView.setText(String.valueOf(position));
+    }
+
+    @Override
+    public int getItemCount() {
+      return doctors.size();
     }
   }
 }
