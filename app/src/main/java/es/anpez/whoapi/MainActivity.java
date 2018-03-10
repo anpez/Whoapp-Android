@@ -11,9 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.security.ProviderInstaller;
 
 import java.util.ArrayList;
@@ -26,6 +24,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+  private DoctorsService doctorsService;
+  private DoctorsAdapter doctorsAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
             .baseUrl("https://api.catalogopolis.xyz/v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build();
-    final DoctorsService doctorsService = retrofit.create(DoctorsService.class);
+    doctorsService = retrofit.create(DoctorsService.class);
 
     final RecyclerView recyclerView = findViewById(R.id.list);
     recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-    final DoctorsAdapter doctorsAdapter = new DoctorsAdapter(new ArrayList<Doctor>());
+    doctorsAdapter = new DoctorsAdapter(new ArrayList<Doctor>());
     recyclerView.setAdapter(doctorsAdapter);
 
     doctorsService.all()
@@ -57,25 +57,6 @@ public class MainActivity extends AppCompatActivity {
               public void onResponse(@NonNull Call<List<Doctor>> call, @NonNull Response<List<Doctor>> response) {
                 Log.d(MainActivity.class.getSimpleName(), "Respuesta:"+response.body());
                 doctorsAdapter.swapData(response.body());
-
-                for(Doctor doctor: response.body()) {
-                  doctorsService.doctorActor(doctor.id)
-                          .enqueue(new Callback<List<Actor>>() {
-                            @Override
-                            public void onResponse(Call<List<Actor>> call, Response<List<Actor>> response) {
-                              Toast.makeText(
-                                      MainActivity.this,
-                                      "El actor es: "+response.body().get(0).name,
-                                      Toast.LENGTH_SHORT
-                              ).show();
-                            }
-
-                            @Override
-                            public void onFailure(Call<List<Actor>> call, Throwable t) {
-
-                            }
-                          });
-                }
               }
 
               @Override
@@ -85,15 +66,33 @@ public class MainActivity extends AppCompatActivity {
             });
   }
 
+  private void getActorsForDoctor(final Doctor doctor) {
+    doctorsService.doctorActor(doctor.id)
+            .enqueue(new Callback<List<Actor>>() {
+              @Override
+              public void onResponse(Call<List<Actor>> actorCall, Response<List<Actor>> actorResponse) {
+                List<Actor> actors = actorResponse.body();
+                doctor.setActors(actors);
+                doctorsAdapter.notifyDataSetChanged();
+              }
+
+              @Override
+              public void onFailure(Call<List<Actor>> call, Throwable t) {
+              }
+            });
+  }
+
   public class DoctorsAdapter extends RecyclerView.Adapter<DoctorsAdapter.DoctorViewHolder> {
     public class DoctorViewHolder extends RecyclerView.ViewHolder {
       TextView nameTextView;
       TextView aliasTextView;
+      RecyclerView doctorsRecyclerView;
 
       public DoctorViewHolder(View itemView) {
         super(itemView);
         nameTextView = itemView.findViewById(R.id.name);
         aliasTextView= itemView.findViewById(R.id.alias);
+        doctorsRecyclerView = itemView.findViewById(R.id.list_actors);
       }
     }
 
@@ -101,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
     void swapData(List<Doctor> doctors) {
       this.doctors = doctors;
+
+      for(final Doctor doctor: doctors) {
+        getActorsForDoctor(doctor);
+      }
       notifyDataSetChanged();
     }
 
@@ -116,13 +119,54 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBindViewHolder(DoctorViewHolder holder, int position) {
-      holder.nameTextView.setText(doctors.get(position).alias);
+      Doctor doctor = doctors.get(position);
+      holder.nameTextView.setText(doctor.alias);
       holder.aliasTextView.setText(String.valueOf(position));
+
+      holder.doctorsRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false));
+      holder.doctorsRecyclerView.setAdapter(new ActorsAdapter(doctor.actors));
     }
 
     @Override
     public int getItemCount() {
       return doctors.size();
+    }
+  }
+
+  public class ActorsAdapter extends RecyclerView.Adapter<ActorsAdapter.ActorViewHolder> {
+    private List<Actor> actors;
+
+    public class ActorViewHolder extends RecyclerView.ViewHolder {
+      TextView actorNameTextView;
+
+      public ActorViewHolder(View itemView) {
+        super(itemView);
+        actorNameTextView = itemView.findViewById(R.id.actor_name);
+      }
+    }
+
+    public ActorsAdapter(List<Actor> actors) {
+      this.actors = actors;
+    }
+
+    @Override
+    public ActorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_actors_item, parent, false);
+      return new ActorViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ActorViewHolder holder, int position) {
+      holder.actorNameTextView.setText(actors.get(position).name);
+    }
+
+    @Override
+    public int getItemCount() {
+      if (null == actors) {
+        return 0;
+      }
+
+      return actors.size();
     }
   }
 }
