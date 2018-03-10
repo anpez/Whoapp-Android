@@ -1,9 +1,19 @@
 package es.anpez.whoapi;
 
-public class Doctor {
-  public String name;
+import com.google.gson.annotations.SerializedName;
 
-  public Doctor(String name) {
-    this.name = name;
+public class Doctor {
+  @SerializedName("id")
+  public int id;
+
+  @SerializedName("incarnation")
+  public String alias;
+
+  @Override
+  public String toString() {
+    return "Doctor{" +
+            "id=" + id +
+            ", alias='" + alias + '\'' +
+            '}';
   }
 }
