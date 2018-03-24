@@ -29,12 +29,11 @@
             android:layout_height="wrap_content"
             tools:text="1st Doctor"/>
 
-        <android.support.v7.widget.RecyclerView
+        <LinearLayout
             android:id="@+id/list_actors"
-            tools:listitem="@layout/list_actors_item"
-            android:scrollbars="vertical"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <ImageView

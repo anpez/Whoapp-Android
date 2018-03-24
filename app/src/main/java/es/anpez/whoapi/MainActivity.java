@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.security.ProviderInstaller;
@@ -86,13 +87,13 @@ public class MainActivity extends AppCompatActivity {
     public class DoctorViewHolder extends RecyclerView.ViewHolder {
       TextView nameTextView;
       TextView aliasTextView;
-      RecyclerView doctorsRecyclerView;
+      LinearLayout doctorsLinearLayout;
 
       public DoctorViewHolder(View itemView) {
         super(itemView);
         nameTextView = itemView.findViewById(R.id.name);
         aliasTextView= itemView.findViewById(R.id.alias);
-        doctorsRecyclerView = itemView.findViewById(R.id.list_actors);
+        doctorsLinearLayout = itemView.findViewById(R.id.list_actors);
       }
     }
 
@@ -119,54 +120,32 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBindViewHolder(DoctorViewHolder holder, int position) {
-      Doctor doctor = doctors.get(position);
+      final Doctor doctor = doctors.get(position);
       holder.nameTextView.setText(doctor.alias);
       holder.aliasTextView.setText(String.valueOf(position));
 
-      holder.doctorsRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false));
-      holder.doctorsRecyclerView.setAdapter(new ActorsAdapter(doctor.actors));
+      holder.doctorsLinearLayout.removeAllViews();
+      if (null != doctor.actors) {
+        for(Actor actor: doctor.actors) {
+          View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_actors_item, holder.doctorsLinearLayout, false);
+          TextView nameTextView = view.findViewById(R.id.actor_name);
+          nameTextView.setText(actor.name);
+
+          holder.doctorsLinearLayout.addView(view);
+        }
+      }
+
+      holder.itemView.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          startActivity(DoctorDetailActivity.newIntent(MainActivity.this, doctor));
+        }
+      });
     }
 
     @Override
     public int getItemCount() {
       return doctors.size();
-    }
-  }
-
-  public class ActorsAdapter extends RecyclerView.Adapter<ActorsAdapter.ActorViewHolder> {
-    private List<Actor> actors;
-
-    public class ActorViewHolder extends RecyclerView.ViewHolder {
-      TextView actorNameTextView;
-
-      public ActorViewHolder(View itemView) {
-        super(itemView);
-        actorNameTextView = itemView.findViewById(R.id.actor_name);
-      }
-    }
-
-    public ActorsAdapter(List<Actor> actors) {
-      this.actors = actors;
-    }
-
-    @Override
-    public ActorViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-      View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_actors_item, parent, false);
-      return new ActorViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(ActorViewHolder holder, int position) {
-      holder.actorNameTextView.setText(actors.get(position).name);
-    }
-
-    @Override
-    public int getItemCount() {
-      if (null == actors) {
-        return 0;
-      }
-
-      return actors.size();
     }
   }
 }
