@@ -19,6 +19,7 @@ public class DoctorDetailActivity extends AppCompatActivity {
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_doctor_detail);
     Doctor doctor = getIntent().getParcelableExtra(DOCTOR);
     Toast.makeText(this, "Doctor: "+doctor, Toast.LENGTH_LONG).show();
   }
