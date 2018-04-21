@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -36,6 +37,9 @@ public class DoctorDetailActivity extends AppCompatActivity {
 
     Doctor doctor = getIntent().getParcelableExtra(DOCTOR);
     Toast.makeText(this, "Doctor: "+doctor, Toast.LENGTH_LONG).show();
+
+    TextView tv = findViewById(R.id.actor_name);
+    tv.setText(doctor.actors.get(0).name);
 
     String url = "http://images.amcnetworks.com/bbcamerica.com/wp-content/uploads/2014/04/davidtennant-1600x720.jpg";
     ImageView avatarImageView = findViewById(R.id.avatar);

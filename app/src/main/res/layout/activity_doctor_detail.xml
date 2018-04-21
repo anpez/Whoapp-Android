@@ -10,6 +10,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <View
             android:layout_width="match_parent"
             android:layout_height="200dp" />
@@ -37,6 +38,16 @@
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 tools:src="@tools:sample/avatars"/>
+            <TextView
+                android:id="@+id/actor_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/abeezee"
+                android:textSize="24sp"
+                android:transitionName="actor_name"
+                android:layout_gravity="bottom"
+                app:layout_collapseMode="parallax"
+                tools:text="@tools:sample/lorem"/>
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_height="?attr/actionBarSize"

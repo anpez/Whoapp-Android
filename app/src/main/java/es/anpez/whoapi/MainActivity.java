@@ -3,9 +3,13 @@ package es.anpez.whoapi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onProviderInstallFailed(int errorCode, Intent recoveryIntent) {}
     });
+
+    setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
     Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://api.catalogopolis.xyz/v1/")
@@ -130,6 +136,9 @@ public class MainActivity extends AppCompatActivity {
           View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.list_actors_item, holder.doctorsLinearLayout, false);
           TextView nameTextView = view.findViewById(R.id.actor_name);
           nameTextView.setText(actor.name);
+          holder.itemView.setTag(nameTextView);
+
+          ViewCompat.setTransitionName(nameTextView, "actor_name");
 
           holder.doctorsLinearLayout.addView(view);
         }
@@ -138,7 +147,16 @@ public class MainActivity extends AppCompatActivity {
       holder.itemView.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-          startActivity(DoctorDetailActivity.newIntent(MainActivity.this, doctor));
+          Intent intent = DoctorDetailActivity.newIntent(MainActivity.this, doctor);
+          ActivityCompat.startActivity(
+                  MainActivity.this,
+                  intent,
+                  ActivityOptionsCompat.makeSceneTransitionAnimation(
+                          MainActivity.this,
+                          (View) v.getTag(),
+                          "actor_name"
+                  ).toBundle()
+          );
         }
       });
     }
